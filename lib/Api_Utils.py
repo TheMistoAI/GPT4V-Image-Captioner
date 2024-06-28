@@ -133,7 +133,7 @@ def claude_api(image_path, prompt, api_key, api_url, model, quality=None):
     # Claude API
     data = {
         "model": model,
-        "max_tokens": 300,
+        "max_tokens": 150,
         "messages": [
             {"role": "user", "content": [
                     {"type": "image", "source": {
@@ -148,45 +148,98 @@ def claude_api(image_path, prompt, api_key, api_url, model, quality=None):
         ]
     }
 
-    # print(f"data: {data}\n")
-
     headers = {
         "Content-Type":"application/json",
         "anthropic-version":"2023-06-01",
         "Authorization":f"Bearer {api_key}"
     }
-    # 配置重试策略
-    retries = Retry(total=5,
-                    backoff_factor=1,
-                    status_forcelist=[429, 500, 502, 503, 504],
-                    allowed_methods=["HEAD", "GET", "OPTIONS", "POST"])  # 更新参数名
-    
-    with requests.Session() as s:
-        s.mount('https://', HTTPAdapter(max_retries=retries))
-
-        try:
-            response = s.post(api_url, headers=headers, json=data)
-            response.raise_for_status()
-        # 连接错误回显
-        except requests.exceptions.HTTPError as errh:
-            return f"HTTP Error: {errh}"
-        except requests.exceptions.ConnectionError as errc:
-            return f"Error Connecting: {errc}"
-        except requests.exceptions.Timeout as errt:
-            return f"Timeout Error: {errt}"
-        except requests.exceptions.RequestException as err:
-            return f"OOps: Something Else: {err}"
-        
+    # 将结果写入txt
     try:
+        response = requests.post(api_url, headers=headers, json=data)
+        response.raise_for_status()
         response_data = response.json()
         if 'error' in response_data:
             return f"API error: {response_data['error']['message']}"
         caption = response_data['content'][0]['text']
-        return caption
+        with open(f"{os.path.splitext(image_path)[0]}.txt", 'w') as file:
+            file.write(caption)
     except Exception as e:
-        return f"Failed to parse the API response: {e}\n{response.text}"
+        return f"Failed to process {image_path}: {e}"
     
+def openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, model="default_gpt_model"):
+    print(f"CLAUDE_MODEL: {model}")
+    
+    with open(image_path, "rb") as image_file:
+        # Downscale the image
+        image = Image.open(image_file)
+        width, height = image.size
+        if quality:
+            if quality == "high":
+                target = 1024
+            elif quality == "low":
+                target = 512
+            elif quality == "auto":
+                if width >= 1024 or height >= 1024:
+                    target = 1024
+                else:
+                    target = 512
+        else:
+            target = 1024
+            
+        aspect_ratio = width / height
 
+        # Determine the new dimensions while maintaining the aspect ratio
+        if width > target or height > target:
+            if width > height:
+                new_width = target
+                new_height = int(new_width / aspect_ratio)
+            else:
+                new_height = target
+                new_width = int(new_height * aspect_ratio)
+        else:
+            new_width, new_height = width, height
+
+        # Resize the image
+        resized_image = image.resize((new_width, new_height), Image.LANCZOS)
+        # Use buffer to store image
+        buffer = io.BytesIO()
+        resized_image.save(buffer, format="JPEG")
+        image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+    # Claude API
+    data = {
+        "model": model,
+        "messages": [
+            {
+                "role": "user",
+                "content":
+                [
+                    {"type": "image_url", "image_url":
+                        {"url": f"data:image/jpeg;base64,{image_base64}"}
+                    },
+                    {"type": "text", "text": prompt}
+                ]
+            }
+        ],
+        "max_tokens": 150
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+    # 将结果写入txt
+    try:
+        response = requests.post(api_url, headers=headers, json=data)
+        response.raise_for_status()
+        response_data = response.json()
+        if 'error' in response_data:
+            return f"API error: {response_data['error']['message']}"
+        caption = response_data['content'][0]['text']
+        with open(f"{os.path.splitext(image_path)[0]}.txt", 'w') as file:
+            file.write(caption)
+    except Exception as e:
+        return f"Failed to process {image_path}: {e}"
 
 # API使用
 def run_openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, model=DEFAULT_GPT_MODEL):
