@@ -238,7 +238,7 @@ def openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, m
         response_data = response.json()
         if 'error' in response_data:
             return f"API error: {response_data['error']['message']}"
-        caption = response_data['content'][0]['text']
+        caption = response_data["choices"][0]["message"]["content"]
         print(caption)
         with open(f"{os.path.splitext(image_path)[0]}.txt", 'w') as file:
             file.write(caption)
