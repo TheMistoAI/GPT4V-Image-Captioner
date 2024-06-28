@@ -5,7 +5,7 @@ from lib.Api_Utils import openai_api, claude_api  # Assuming these functions are
 # Hardcoded API configurations
 API_KEY_GPT = 'your_gpt_api_key'
 API_URL_GPT = 'your_gpt_api_url'
-API_KEY_CLAUDE = 'your_claude_api_key'
+API_KEY_CLAUDE = 'sk-W39pXOPIBceb804110faT3BlBKFJ8c8F0987355E47908C93'
 API_URL_CLAUDE = 'your_claude_api_url'
 
 def process_image(image_path, model_type):
