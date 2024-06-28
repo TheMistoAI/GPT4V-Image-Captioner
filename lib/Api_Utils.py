@@ -151,11 +151,10 @@ def claude_api(image_path, prompt, api_key, api_url, model, quality=None):
     # print(f"data: {data}\n")
 
     headers = {
-        "Content-Type": "application/json",
-        "x-api-key:": api_key,
-        "anthropic-version": "2023-06-01"
+        "Content-Type":"application/json",
+        "anthropic-version":"2023-06-01",
+        "Authorization":api_key
     }
-
     # 配置重试策略
     retries = Retry(total=5,
                     backoff_factor=1,
@@ -198,7 +197,9 @@ def run_openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=1
     if is_ali(api_url):
         return qwen_api(image_path, prompt, api_key)
     if is_claude(api_url, model):
+        print('claude')
         return claude_api(image_path, prompt, api_key, api_url, model, quality)
+
     with open(image_path, "rb") as image_file:
         image_base64 = base64.b64encode(image_file.read()).decode('utf-8')
 
