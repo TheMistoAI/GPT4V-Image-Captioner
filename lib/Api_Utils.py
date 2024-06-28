@@ -90,7 +90,7 @@ def qwen_api(image_path, prompt, api_key):
         caption = response
     return caption
 
-def claude_api(image_path, prompt, api_key, api_url, model, quality=None):
+def claude_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, model="claude-3-5-sonnet-20240620"):
     print(f"CLAUDE_MODEL: {model}")
     
     with open(image_path, "rb") as image_file:
@@ -155,7 +155,7 @@ def claude_api(image_path, prompt, api_key, api_url, model, quality=None):
     }
     # 将结果写入txt
     try:
-        response = requests.post(api_url, headers=headers, json=data)
+        response = requests.post(api_url, headers=headers, json=data, timeout=timeout)
         response.raise_for_status()
         response_data = response.json()
         if 'error' in response_data:
@@ -166,7 +166,7 @@ def claude_api(image_path, prompt, api_key, api_url, model, quality=None):
     except Exception as e:
         return f"Failed to process {image_path}: {e}"
     
-def openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, model="default_gpt_model"):
+def openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, model="gpt-4o-2024-05-13"):
     print(f"CLAUDE_MODEL: {model}")
     
     with open(image_path, "rb") as image_file:
@@ -230,7 +230,7 @@ def openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, m
     }
     # 将结果写入txt
     try:
-        response = requests.post(api_url, headers=headers, json=data)
+        response = requests.post(api_url, headers=headers, json=data, timeout=timeout)
         response.raise_for_status()
         response_data = response.json()
         if 'error' in response_data:
