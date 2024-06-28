@@ -161,13 +161,14 @@ def claude_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, m
         if 'error' in response_data:
             return f"API error: {response_data['error']['message']}"
         caption = response_data['content'][0]['text']
+        print(caption)
         with open(f"{os.path.splitext(image_path)[0]}.txt", 'w') as file:
             file.write(caption)
     except Exception as e:
         return f"Failed to process {image_path}: {e}"
     
 def openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, model="gpt-4o-2024-05-13"):
-    print(f"CLAUDE_MODEL: {model}")
+    print(f"GPT_MODEL: {model}")
     
     with open(image_path, "rb") as image_file:
         # Downscale the image
@@ -236,6 +237,7 @@ def openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, m
         if 'error' in response_data:
             return f"API error: {response_data['error']['message']}"
         caption = response_data['content'][0]['text']
+        print(caption)
         with open(f"{os.path.splitext(image_path)[0]}.txt", 'w') as file:
             file.write(caption)
     except Exception as e:
