@@ -231,9 +231,7 @@ def openai_api(image_path, prompt, api_key, api_url, quality=None, timeout=10, m
     }
     # 将结果写入txt
     try:
-        print(headers)
         response = requests.post(api_url, headers=headers, json=data, timeout=timeout)
-        print(response)
         response.raise_for_status()
         response_data = response.json()
         if 'error' in response_data:
