@@ -38,5 +38,5 @@ def process_directory(directory_path):
             thread.join()
 
 if __name__ == "__main__":
-    directory_path = 'your_directory_path'  # Define your directory path here
+    directory_path = f'C:\Users\yuhan\Downloads\prompt_test'
     process_directory(directory_path)
