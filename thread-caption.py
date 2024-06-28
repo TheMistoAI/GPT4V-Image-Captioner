@@ -1,6 +1,6 @@
 import os
 import threading
-from lib.Api_Utils import run_openai_api, claude_api  # Assuming these functions are defined in Api_Utils
+from lib.Api_Utils import openai_api, claude_api  # Assuming these functions are defined in Api_Utils
 
 # Hardcoded API configurations
 API_KEY_GPT = 'your_gpt_api_key'
@@ -12,7 +12,7 @@ def process_image(image_path, model_type):
     """Process an image and save the caption to a text file."""
     output_filename = f"{os.path.splitext(image_path)[0]}.txt"
     if model_type == 'gpt':
-        caption = run_openai_api(image_path, API_KEY_GPT, API_URL_GPT)
+        caption = openai_api(image_path, API_KEY_GPT, API_URL_GPT)
     else:
         caption = claude_api(image_path, API_KEY_CLAUDE, API_URL_CLAUDE)
     with open(output_filename, 'w') as file:
@@ -40,8 +40,5 @@ def process_directory(directory_path):
             thread.join()
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) > 1:
-        process_directory(sys.argv[1])
-    else:
-        print("Please provide the directory path as an argument.")
+    directory_path = 'your_directory_path'  # Define your directory path here
+    process_directory(directory_path)
