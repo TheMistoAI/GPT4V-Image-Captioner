@@ -24,14 +24,18 @@ def process_directory(directory_path):
         threads = []
         # Process two images at a time, one with GPT and one with Claude
         if i < len(images):
-            thread_gpt = threading.Thread(target=process_image, args=(images[i], 'gpt'))
-            threads.append(thread_gpt)
-            thread_gpt.start()
+            output_filename = f"{os.path.splitext(images[i])[0]}.txt"
+            if not os.path.exists(output_filename):  # Check if the txt file already exists
+                thread_gpt = threading.Thread(target=process_image, args=(images[i], 'gpt'))
+                threads.append(thread_gpt)
+                thread_gpt.start()
             i += 1
         if i < len(images):
-            thread_claude = threading.Thread(target=process_image, args=(images[i], 'claude'))
-            threads.append(thread_claude)
-            thread_claude.start()
+            output_filename = f"{os.path.splitext(images[i])[0]}.txt"
+            if not os.path.exists(output_filename):  # Check if the txt file already exists
+                thread_claude = threading.Thread(target=process_image, args=(images[i], 'claude'))
+                threads.append(thread_claude)
+                thread_claude.start()
             i += 1
         for thread in threads:
             thread.join()
